@@ -457,6 +457,7 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
 
     const char *p_start = NULL;
     const char *p_end = NULL;
+
   nextline:
     tok->start = NULL;
     tok->starting_col_offset = -1;
@@ -691,7 +692,7 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
     nonascii = 0;
     if (is_potential_identifier_start(c)) {
         /* Process the various legal combinations of b"", r"", u"", and f"". */
-        int saw_b = 0, saw_r = 0, saw_u = 0, saw_f = 0, saw_t = 0;
+        int saw_b = 0, saw_r = 0, saw_u = 0, saw_d = 0, saw_f = 0, saw_t = 0;
         while (1) {
             if (!saw_b && (c == 'b' || c == 'B')) {
                 saw_b = 1;
@@ -704,6 +705,9 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
             /* ur"" and ru"" are not supported */
             else if (!saw_r && (c == 'r' || c == 'R')) {
                 saw_r = 1;
+            }
+            else if (!saw_d && (c == 'd' || c == 'D')) {
+                saw_d = 1;
             }
             else if (!saw_f && (c == 'f' || c == 'F')) {
                 saw_f = 1;
@@ -724,7 +728,7 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
                 }
 
                 // Handle valid f or t string creation:
-                if (saw_f || saw_t) {
+                if (saw_f || saw_t || saw_d) {
                     goto f_string_quote;
                 }
                 goto letter_quote;
@@ -998,7 +1002,7 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
     }
 
   f_string_quote:
-    if (((Py_TOLOWER(*tok->start) == 'f' || Py_TOLOWER(*tok->start) == 'r' || Py_TOLOWER(*tok->start) == 't')
+    if (((Py_TOLOWER(*tok->start) == 'f' || Py_TOLOWER(*tok->start) == 'r' || Py_TOLOWER(*tok->start) == 't' || Py_TOLOWER(*tok->start) == 'd')
         && (c == '\'' || c == '"'))) {
 
         int quote = c;
@@ -1066,6 +1070,28 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
                 if (Py_TOLOWER(*(tok->start + 1)) == 't') {
                     string_kind = TSTRING;
                 }
+                break;
+            case 'D':
+            case 'd':
+                if (quote_size != 3) {
+                    _PyTokenizer_syntaxerror(tok, "d-string: expecting multi-line string");
+                }
+                int end_of_line = 0;
+                while (end_of_line == 0) {
+                    int c = tok_nextc(tok);
+                    if (c == '\n') {
+                        end_of_line = 1;
+                    }
+                    if (c == EOF) {
+                        _PyTokenizer_syntaxerror(tok, "unterminated d-string literal"
+                                         " (detected at line %d)", tok->multi_line_start);
+                        if (c != '\n') {
+                            tok->done = E_EOFS;
+                        }
+                        return MAKE_TOKEN(ERRORTOKEN);
+                    }
+                }
+
                 break;
             default:
                 Py_UNREACHABLE();
