@@ -27,6 +27,7 @@ enum interactive_underflow_t {
 struct token {
     int level;
     int lineno, col_offset, end_lineno, end_col_offset;
+    int dedent_string;
     const char *start, *end;
     PyObject *metadata;
 };
@@ -131,6 +132,7 @@ struct tok_state {
     int tok_extra_tokens;
     int comment_newline;
     int implicit_newline;
+    int dedent_string;
 #ifdef Py_DEBUG
     int debug;
 #endif

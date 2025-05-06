@@ -40,7 +40,7 @@ typedef struct {
     int type;
     PyObject *bytes;
     int level;
-    int lineno, col_offset, end_lineno, end_col_offset;
+    int lineno, col_offset, end_lineno, end_col_offset, dedent_string;
     Memo *memo;
     PyObject *metadata;
 } Token;

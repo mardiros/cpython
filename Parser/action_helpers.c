@@ -1,7 +1,7 @@
 #include <Python.h>
 #include "pycore_pystate.h"         // _PyInterpreterState_GET()
 #include "pycore_runtime.h"         // _PyRuntime
-#include "pycore_unicodeobject.h"   // _PyUnicode_InternImmortal()
+#include "pycore_unicodeobject.h"   // _PyUnicode_InternImmortal(), _PyUnicode_Dedent()
 
 #include "pegen.h"
 #include "string_parser.h"          // _PyPegen_decode_string()
@@ -1425,6 +1425,10 @@ expr_ty _PyPegen_constant_from_token(Parser* p, Token* tok) {
     PyObject* str = PyUnicode_FromString(bstr);
     if (str == NULL) {
         return NULL;
+    }
+    if (tok->dedent_string) {
+        str = _PyUnicode_Dedent(str);
+        tok->dedent_string = 0;
     }
     if (_PyArena_AddPyObject(p->arena, str) < 0) {
         Py_DECREF(str);

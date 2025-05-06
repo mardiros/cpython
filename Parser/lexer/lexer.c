@@ -1076,6 +1076,7 @@ tok_get_normal_mode(struct tok_state *tok, tokenizer_mode* current_tok, struct t
                 if (quote_size != 3) {
                     _PyTokenizer_syntaxerror(tok, "d-string: expecting multi-line string");
                 }
+                tok->dedent_string = 1;
                 int end_of_line = 0;
                 while (end_of_line == 0) {
                     int c = tok_nextc(tok);

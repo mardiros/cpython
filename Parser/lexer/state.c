@@ -142,6 +142,7 @@ _PyLexer_token_setup(struct tok_state *tok, struct token *token, int type, const
     token->col_offset = token->end_col_offset = -1;
     token->start = start;
     token->end = end;
+    token->dedent_string = tok->dedent_string;
 
     if (start != NULL && end != NULL) {
         token->col_offset = tok->starting_col_offset;

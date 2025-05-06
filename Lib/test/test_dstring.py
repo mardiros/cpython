@@ -1,5 +1,4 @@
 import unittest
-from textwrap import dedent
 
 class TestCase(unittest.TestCase):
     # def test_syntax_error_if_not_multiline(self):
@@ -13,18 +12,17 @@ class TestCase(unittest.TestCase):
 
     def test_simplestr(self):
         self.assertEqual(
-            dedent(d"""
+            d"""
             x
-            """),
+            """,
             "x\n"
         )
 
     def test_str_with_hint(self):
         self.assertEqual(
-            dedent(d"""csv
+            d"""csv
             x
-            """
-            ),
+            """,
             "x\n"
         )
 

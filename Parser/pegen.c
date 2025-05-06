@@ -208,6 +208,7 @@ initialize_token(Parser *p, Token *parser_token, struct token *new_token, int to
     parser_token->end_lineno = new_token->end_lineno;
     parser_token->end_col_offset = p->tok->lineno == p->starting_lineno ? p->starting_col_offset + new_token->end_col_offset
                                                                  : new_token->end_col_offset;
+    parser_token->dedent_string = new_token->dedent_string;
 
     p->fill += 1;
 
